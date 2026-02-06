@@ -1,8 +1,11 @@
 @import "tailwindcss";
+@import "mapbox-gl/dist/mapbox-gl.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
+  --gold: #D4AF37;
+  --gold-light: #F8D673;
 }
 
 @theme inline {
@@ -12,15 +15,38 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Mapbox popup overrides */
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  background-color: #18181b !important;
+  border: 1px solid #27272a;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #18181b !important;
+}
+
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  border-top-color: #18181b !important;
+}
+
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+  border-bottom-color: #18181b !important;
+}
+
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  border-right-color: #18181b !important;
+}
+
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  border-left-color: #18181b !important;
 }
