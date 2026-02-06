@@ -1,148 +1,98 @@
-# Real Estate Property Listings - Next.js Frontend
+# TexasRealty - Frontend
 
-A modern, responsive Next.js application for browsing real estate property listings powered by the SimplyRETS API.
+Next.js 16 real estate search application with interactive Mapbox maps, property filtering, and a dark theme with gold accents.
 
-## ✨ Features
+## Tech Stack
 
-- 🏠 **Property Listings** - Browse properties in a responsive grid layout
-- 🔍 **Advanced Filters** - Filter by price, bedrooms, bathrooms, and property type
-- 📄 **Pagination** - Navigate through property results
-- 🖼️ **Property Details** - View detailed information with photo galleries
-- ⚡ **Server-Side Rendering** - Optimized for SEO and performance
-- 📱 **Responsive Design** - Works perfectly on mobile, tablet, and desktop
-- 🎨 **Tailwind CSS** - Modern, utility-first styling
-- 📘 **TypeScript** - Full type safety throughout
+- **Framework:** Next.js 16, React 19, TypeScript 5
+- **Styling:** Tailwind CSS 4, Geist font
+- **Maps:** Mapbox GL 3.18, react-map-gl 8.1
+- **HTTP:** Axios
+- **Deployment:** Vercel
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ installed
+- Node.js 18+
+- Mapbox access token ([mapbox.com](https://account.mapbox.com/access-tokens/))
 - Backend API running (see [../idx-api/README.md](../idx-api/README.md))
 
-### Installation
-
-Dependencies are already installed! If you need to reinstall:
+### Setup
 
 ```bash
+cd idx-thing
 npm install
 ```
 
-### Environment Setup
-
-The `.env.local` file is already configured to point to your local backend:
+Create `.env.local`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_API_URL=https://idx-api-tau.vercel.app/api
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
 ```
 
-For production, update this to your deployed backend URL.
-
-### Run Development Server
+### Development
 
 ```bash
-npm run dev
+npm run dev       # http://localhost:3000
+npm run build     # Production build
+npm run start     # Production server
+npm run lint      # ESLint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Routes
 
-## 📂 Project Structure
+| Route | Description |
+|---|---|
+| `/` | Landing page with hero search and featured properties |
+| `/search` | Interactive map + sidebar property search with filters |
+| `/property/[mlsId]` | Server-rendered property detail page |
+
+## Features
+
+- **Map Search:** Interactive Mapbox map with price pill pins rendered as native WebGL symbol layers (locked to coordinates during zoom/pan)
+- **Filters:** Price range, beds, baths, property type synced via URL search params
+- **Sidebar:** Scrollable property cards with hover state synced to map pins
+- **Property Detail:** Photo gallery, key facts grid, home details, embedded location map
+- **Dark Theme:** Black/zinc backgrounds with gold (#D4AF37) accents
+- **Map Styles:** Toggle between dark streets and satellite views
+
+## Project Structure
 
 ```
-idx-thing/
-├── app/
-│   ├── layout.tsx              # Root layout
-│   ├── page.tsx                # Home page (property listings)
-│   ├── property/[mlsId]/       # Property detail pages
-│   └── globals.css             # Global styles
-├── components/
-│   ├── common/
-│   │   ├── ErrorMessage.tsx    # Error display
-│   │   ├── LoadingSpinner.tsx  # Loading indicator
-│   │   └── Pagination.tsx      # Pagination controls
-│   └── properties/
-│       ├── PropertyCard.tsx    # Property card component
-│       ├── PropertyFilters.tsx # Filter panel
-│       └── PropertyGrid.tsx    # Grid layout
-├── lib/
-│   ├── api/
-│   │   └── propertyApi.ts      # API client
-│   ├── types/
-│   │   └── property.ts         # TypeScript types
-│   └── utils/
-│       ├── constants.ts        # App constants
-│       └── formatters.ts       # Utility functions
-└── public/                     # Static assets
+app/
+  layout.tsx                    # Root layout with Navbar
+  page.tsx                      # Homepage with hero search
+  globals.css                   # Global styles, theme colors
+  search/page.tsx               # Map-based search (client)
+  property/[mlsId]/page.tsx     # Property detail (server)
+components/
+  layout/Navbar.tsx
+  home/                         # HeroSearch, FeaturedProperties, FilterBar
+  search/                       # MapView, PropertySidebar, PropertyPopup, MapStyleToggle
+  property/                     # PropertyInfo, PropertyMap
+  common/                       # LoadingSpinner, ErrorMessage, Pagination
+lib/
+  api/propertyApi.ts            # Axios API client with interceptors
+  types/property.ts             # TypeScript interfaces
+  utils/
+    formatters.ts               # Price, number, date formatting
+    constants.ts                # Property types, API config
+    searchParams.ts             # URL param <-> filter conversion
 ```
 
-## 🛠️ Available Scripts
+## Environment Variables
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | Mapbox GL access token |
 
-## 🔧 Tech Stack
-
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript 5
-- **Styling**: Tailwind CSS 4
-- **HTTP Client**: Axios
-- **Image Optimization**: Next.js Image component
-
-## 📝 Usage
-
-### Browse Properties
-
-1. Visit the home page to see all available properties
-2. Use the filter panel on the left to narrow down results:
-   - Set price range (min/max)
-   - Filter by number of bedrooms
-   - Filter by number of bathrooms
-   - Select property type (Residential, Condominium, etc.)
-3. Click "Apply Filters" to update results
-4. Use pagination at the bottom to navigate through pages
-
-### View Property Details
-
-1. Click on any property card
-2. View high-resolution photos
-3. See detailed property information and features
-4. Use "Back to listings" to return to the main page
-
-## 🚢 Deployment
-
-### Deploy to Vercel
-
-1. Push your code to GitHub
-2. Import project in [Vercel](https://vercel.com)
-3. Set environment variable:
-   - `NEXT_PUBLIC_API_URL` = Your backend API URL
-4. Deploy!
-
-Or use the Vercel CLI:
+## Deployment
 
 ```bash
 vercel
 ```
 
-## 🐛 Troubleshooting
-
-### API Connection Issues
-
-If you see "Failed to fetch properties":
-
-1. Ensure the backend is running at `http://localhost:8000`
-2. Check that `NEXT_PUBLIC_API_URL` in `.env.local` is correct
-3. Verify CORS is properly configured in the backend
-
-### Image Loading Issues
-
-If property images don't load:
-
-1. Check `next.config.ts` has the correct `remotePatterns`
-2. Verify the SimplyRETS image URLs are accessible
-
-## 📄 License
-
-This project is part of a real estate listing application.
+Set environment variables in the Vercel dashboard. The production app is at `https://idx-thing.vercel.app`.
