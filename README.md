@@ -2,7 +2,7 @@
 
 Next.js 16 real estate search application with interactive Mapbox maps, property filtering, and a dark theme with gold accents.
 
-## Tech Stack
+## Tech Stackkk
 
 - **Framework:** Next.js 16, React 19, TypeScript 5
 - **Styling:** Tailwind CSS 4, Geist font
