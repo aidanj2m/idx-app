@@ -1,44 +1,28 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import * as Slider from '@radix-ui/react-slider';
+import { ChevronDown, Minus, Plus } from 'lucide-react';
 
 interface FilterBarProps {
   filters: Record<string, string>;
   onChange: (filters: Record<string, string>) => void;
 }
 
-const PRICE_RANGES = [
-  { label: 'Any Price', min: '', max: '' },
-  { label: 'Under $200K', min: '', max: '200000' },
-  { label: '$200K - $500K', min: '200000', max: '500000' },
-  { label: '$500K - $1M', min: '500000', max: '1000000' },
-  { label: '$1M+', min: '1000000', max: '' },
-];
-
 const STATUS_OPTIONS = [
-  { label: 'Any Status', value: '' },
-  { label: 'Active', value: 'active' },
+  { label: 'Active', value: '' },
   { label: 'Sold', value: 'sold' },
   { label: 'Rentals', value: 'RNT' },
 ];
 
 const TYPE_OPTIONS = [
-  { label: 'Any Type', value: '' },
+  { label: 'All listings', value: '' },
   { label: 'Residential', value: 'RES' },
   { label: 'Condo', value: 'CND' },
   { label: 'Multifamily', value: 'MUL' },
 ];
 
-const BED_OPTIONS = [
-  { label: 'Any Beds', value: '' },
-  { label: '1+ Beds', value: '1' },
-  { label: '2+ Beds', value: '2' },
-  { label: '3+ Beds', value: '3' },
-  { label: '4+ Beds', value: '4' },
-  { label: '5+ Beds', value: '5' },
-];
-
-function FilterDropdown({
+function Dropdown({
   label,
   options,
   value,
@@ -60,26 +44,23 @@ function FilterDropdown({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const selectedLabel = options.find((o) => o.value === value)?.label || label;
+  const selectedLabel = options.find((o) => o.value === value)?.label || options[0].label;
 
   return (
     <div ref={ref} className="relative">
+      <span className="block text-[10px] uppercase tracking-wider text-stone-400 font-medium mb-1.5">{label}</span>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-          value
-            ? 'bg-gradient-to-r from-[#D4AF37] to-[#F8D673] text-black border-[#D4AF37]'
-            : 'bg-zinc-900 text-gray-300 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800'
+        className={`flex items-center gap-2 px-3.5 h-[42px] bg-white border rounded-lg text-[13px] hover:border-stone-300 transition-all min-w-[140px] justify-between ${
+          open ? 'border-[#8B2332]/30 ring-2 ring-[#8B2332]/10' : 'border-stone-200'
         }`}
       >
-        {selectedLabel}
-        <svg className="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <span className="text-[13px] font-medium text-stone-800">{selectedLabel}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 py-2 min-w-[180px] z-[9999]">
+        <div className="absolute top-full mt-2 left-0 bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-stone-100 py-1.5 min-w-[180px] z-[9999]">
           {options.map((option) => (
             <button
               key={option.value}
@@ -88,8 +69,10 @@ function FilterDropdown({
                 onSelect(option.value);
                 setOpen(false);
               }}
-              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-800 transition-colors ${
-                value === option.value ? 'text-[#D4AF37] font-semibold bg-zinc-800/50' : 'text-gray-300'
+              className={`w-full text-left px-4 py-2.5 text-[13px] transition-colors ${
+                value === option.value
+                  ? 'text-[#8B2332] font-semibold bg-[#8B2332]/5'
+                  : 'text-stone-600 hover:bg-stone-50'
               }`}
             >
               {option.label}
@@ -101,42 +84,183 @@ function FilterDropdown({
   );
 }
 
-export function FilterBar({ filters, onChange }: FilterBarProps) {
-  const handlePriceChange = (index: number) => {
-    const range = PRICE_RANGES[index];
-    const updated = { ...filters };
-    if (range.min) updated.minprice = range.min;
-    else delete updated.minprice;
-    if (range.max) updated.maxprice = range.max;
-    else delete updated.maxprice;
-    onChange(updated);
+function BedsCounter({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (val: number) => void;
+}) {
+  return (
+    <div>
+      <span className="block text-[10px] uppercase tracking-wider text-stone-400 font-medium mb-1.5">Bedrooms</span>
+      <div className="flex items-center h-[42px] border border-stone-200 rounded-lg bg-white overflow-hidden">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(0, value - 1))}
+          className="px-3 h-full text-stone-400 hover:text-[#8B2332] hover:bg-stone-50 transition-colors"
+        >
+          <Minus className="w-3.5 h-3.5" />
+        </button>
+        <span className="px-3 text-[13px] font-medium text-stone-800 min-w-[50px] text-center border-x border-stone-200">
+          {value}+
+        </span>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(10, value + 1))}
+          className="px-3 h-full text-stone-400 hover:text-[#8B2332] hover:bg-stone-50 transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PriceRangeSlider({
+  minPrice,
+  maxPrice,
+  onMinChange,
+  onMaxChange,
+}: {
+  minPrice: number;
+  maxPrice: number;
+  onMinChange: (val: number) => void;
+  onMaxChange: (val: number) => void;
+}) {
+  const MAX = 5000000;
+
+  const minPct = minPrice / MAX;
+  const maxPct = maxPrice / MAX;
+
+  // Distribution curve points (x 0-1, y 0-1 where 1 = top)
+  const curvePoints = [
+    [0, 0.02], [0.05, 0.06], [0.1, 0.14], [0.15, 0.3], [0.2, 0.55],
+    [0.25, 0.78], [0.3, 0.92], [0.35, 1.0], [0.4, 0.9], [0.45, 0.76],
+    [0.5, 0.62], [0.55, 0.5], [0.6, 0.4], [0.65, 0.32], [0.7, 0.25],
+    [0.75, 0.19], [0.8, 0.14], [0.85, 0.1], [0.9, 0.07], [0.95, 0.04], [1, 0.02],
+  ];
+
+  const graphH = 32;
+  const toSvgPoints = (pts: number[][]) =>
+    pts.map(([x, y]) => `${x * 200},${graphH - y * (graphH - 2)}`).join(' ');
+  const areaPoints = `0,${graphH} ${toSvgPoints(curvePoints)} 200,${graphH}`;
+  const linePoints = toSvgPoints(curvePoints);
+
+  const formatLabel = (val: number) => {
+    if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `$${(val / 1000).toFixed(0)}K`;
+    return `$${val}`;
   };
 
-  const currentPriceLabel =
-    PRICE_RANGES.find(
-      (r) => r.min === (filters.minprice || '') && r.max === (filters.maxprice || '')
-    )?.label || 'Price Range';
+  return (
+    <div className="flex-1 min-w-[240px]">
+      <span className="block text-[10px] uppercase tracking-wider text-stone-400 font-medium mb-1.5">Price Range</span>
 
-  const priceOptions = PRICE_RANGES.map((r, i) => ({
-    label: r.label,
-    value: String(i),
-  }));
+      {/* Distribution graph */}
+      <svg viewBox={`0 0 200 ${graphH}`} className="w-full h-8 block" preserveAspectRatio="none">
+        <defs>
+          <clipPath id="active-range">
+            <rect x={minPct * 200} y="0" width={(maxPct - minPct) * 200} height={graphH} />
+          </clipPath>
+        </defs>
+        {/* Inactive area */}
+        <polygon fill="#e7e5e4" opacity="0.5" points={areaPoints} />
+        {/* Active area */}
+        <polygon fill="rgba(139,35,50,0.2)" clipPath="url(#active-range)" points={areaPoints} />
+        {/* Line */}
+        <polyline fill="none" stroke="rgba(139,35,50,0.3)" strokeWidth="1" points={linePoints} />
+        {/* Active line */}
+        <polyline fill="none" stroke="#8B2332" strokeWidth="1.5" clipPath="url(#active-range)" points={linePoints} />
+      </svg>
 
-  const currentPriceValue = String(
-    PRICE_RANGES.findIndex(
-      (r) => r.min === (filters.minprice || '') && r.max === (filters.maxprice || '')
-    )
+      {/* Slider directly below graph */}
+      <Slider.Root
+        min={0}
+        max={MAX}
+        step={50000}
+        value={[minPrice, maxPrice]}
+        onValueChange={([min, max]) => {
+          onMinChange(min);
+          onMaxChange(max);
+        }}
+        minStepsBetweenThumbs={1}
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          userSelect: 'none',
+          touchAction: 'none',
+          width: '100%',
+          height: '16px',
+          marginTop: '-1px',
+        }}
+      >
+        <Slider.Track
+          style={{
+            position: 'relative',
+            flexGrow: 1,
+            height: '2px',
+            background: '#d6d3d1',
+            borderRadius: '9999px',
+          }}
+        >
+          <Slider.Range
+            style={{
+              position: 'absolute',
+              height: '100%',
+              background: '#8B2332',
+              borderRadius: '9999px',
+            }}
+          />
+        </Slider.Track>
+        <Slider.Thumb
+          aria-label="Minimum price"
+          style={{
+            display: 'block',
+            width: '14px',
+            height: '14px',
+            background: '#8B2332',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            border: '2.5px solid white',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+            outline: 'none',
+          }}
+        />
+        <Slider.Thumb
+          aria-label="Maximum price"
+          style={{
+            display: 'block',
+            width: '14px',
+            height: '14px',
+            background: '#8B2332',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            border: '2.5px solid white',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+            outline: 'none',
+          }}
+        />
+      </Slider.Root>
+
+      {/* Price labels */}
+      <div className="flex justify-between mt-0.5">
+        <span className="text-[11px] text-stone-500">{formatLabel(minPrice)}</span>
+        <span className="text-[11px] text-stone-500">{maxPrice >= MAX ? '$5M+' : formatLabel(maxPrice)}</span>
+      </div>
+    </div>
   );
+}
+
+export function FilterBar({ filters, onChange }: FilterBarProps) {
+  const beds = Number(filters.minbeds || '0');
+  const minPrice = Number(filters.minprice || '0');
+  const maxPrice = Number(filters.maxprice || '5000000');
 
   return (
-    <div className="flex flex-wrap justify-center gap-3">
-      <FilterDropdown
-        label="Price Range"
-        options={priceOptions}
-        value={currentPriceValue === '-1' ? '' : currentPriceValue}
-        onSelect={(v) => handlePriceChange(Number(v))}
-      />
-      <FilterDropdown
+    <div className="flex items-end gap-3">
+      <Dropdown
         label="Status"
         options={STATUS_OPTIONS}
         value={filters.status || ''}
@@ -147,7 +271,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           onChange(updated);
         }}
       />
-      <FilterDropdown
+      <Dropdown
         label="Type"
         options={TYPE_OPTIONS}
         value={filters.type || ''}
@@ -158,14 +282,28 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           onChange(updated);
         }}
       />
-      <FilterDropdown
-        label="Beds"
-        options={BED_OPTIONS}
-        value={filters.minbeds || ''}
-        onSelect={(v) => {
+      <BedsCounter
+        value={beds}
+        onChange={(val) => {
           const updated = { ...filters };
-          if (v) updated.minbeds = v;
+          if (val > 0) updated.minbeds = String(val);
           else delete updated.minbeds;
+          onChange(updated);
+        }}
+      />
+      <PriceRangeSlider
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onMinChange={(val) => {
+          const updated = { ...filters };
+          if (val > 0) updated.minprice = String(val);
+          else delete updated.minprice;
+          onChange(updated);
+        }}
+        onMaxChange={(val) => {
+          const updated = { ...filters };
+          if (val < 5000000) updated.maxprice = String(val);
+          else delete updated.maxprice;
           onChange(updated);
         }}
       />

@@ -1,44 +1,73 @@
 import { HeroSearch } from '@/components/home/HeroSearch';
 import { FeaturedProperties } from '@/components/home/FeaturedProperties';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[#fafaf9]">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center px-4 pt-16">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(212,175,55,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+      <section className="relative min-h-[85vh] flex flex-col justify-center pt-[72px]">
+        {/* Background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80')`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
         </div>
 
-        <div className="relative text-center max-w-4xl mx-auto pt-20 pb-12">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Find Your Home<br />
-            <span className="bg-gradient-to-r from-[#D4AF37] via-[#F8D673] to-[#D4AF37] bg-clip-text text-transparent">
-              in Texas
-            </span>
-          </h1>
-          <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
-            Advanced property search technology to find your perfect home
-          </p>
-          <HeroSearch />
+        {/* Hero content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full">
+          <div className="max-w-3xl mb-14">
+            <p className="text-sm font-medium tracking-[0.2em] uppercase text-white/60 mb-4">
+              Texas Real Estate
+            </p>
+            <h1 className="font-serif text-5xl md:text-7xl font-semibold text-white leading-[1.1] mb-6">
+              Find Your Place<br />in Texas
+            </h1>
+            <p className="text-lg md:text-xl text-white/70 font-light max-w-lg leading-relaxed">
+              Discover luxury homes, family estates, and investment properties across the Lone Star State.
+            </p>
+          </div>
+
+          {/* Search panel */}
+          <div className="max-w-4xl">
+            <HeroSearch />
+          </div>
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="max-w-7xl mx-auto px-6 py-16 pb-24">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-3">
-            Featured Listings
-          </h2>
-          <p className="text-gray-400">
-            Explore available properties
-          </p>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <div className="flex items-end justify-between mb-10 sm:mb-14">
+          <div>
+            <p className="text-[13px] font-medium tracking-[0.2em] uppercase text-[#8B2332] mb-3">
+              Curated Selection
+            </p>
+            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-stone-900">
+              Featured Properties
+            </h2>
+          </div>
+          <Link
+            href="/search"
+            className="hidden md:flex items-center gap-2 text-[13px] font-semibold text-[#8B2332] hover:text-[#6d1b28] transition-colors group"
+          >
+            View all listings
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
         <FeaturedProperties />
+        <div className="md:hidden mt-8 text-center">
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8B2332]"
+          >
+            View all listings
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
     </div>
   );

@@ -11,43 +11,51 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor for logging
-apiClient.interceptors.request.use(
-  (config) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url);
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const message = error.response?.data?.detail || error.message || 'An error occurred';
-    console.error('API Error:', message);
     return Promise.reject(new Error(message));
   }
 );
 
+// Simple in-memory cache with TTL
+const cache = new Map<string, { data: unknown; expiry: number }>();
+const CACHE_TTL = 60_000; // 1 minute
+
+function getCached<T>(key: string): T | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiry) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+function setCache(key: string, data: unknown) {
+  cache.set(key, { data, expiry: Date.now() + CACHE_TTL });
+}
+
 export const propertyApi = {
-  /**
-   * Fetch properties with optional filters
-   * @param filters - Filter parameters
-   * @returns Property list response
-   */
   getProperties: async (filters: PropertyFilters = {}): Promise<PropertyListResponse> => {
+    const cacheKey = `properties:${JSON.stringify(filters)}`;
+    const cached = getCached<PropertyListResponse>(cacheKey);
+    if (cached) return cached;
+
     const response = await apiClient.get<PropertyListResponse>('/properties', { params: filters });
+    setCache(cacheKey, response.data);
     return response.data;
   },
 
-  /**
-   * Fetch single property by MLS ID
-   * @param mlsId - Property MLS ID
-   * @returns Property details
-   */
   getPropertyById: async (mlsId: number): Promise<Property> => {
+    const cacheKey = `property:${mlsId}`;
+    const cached = getCached<Property>(cacheKey);
+    if (cached) return cached;
+
     const response = await apiClient.get<Property>(`/properties/${mlsId}`);
+    setCache(cacheKey, response.data);
     return response.data;
   },
 };

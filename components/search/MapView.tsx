@@ -8,7 +8,7 @@ import { MapStyleToggle } from './MapStyleToggle';
 import { formatPrice } from '@/lib/utils/formatters';
 
 const MAPBOX_STYLES = {
-  streets: 'mapbox://styles/mapbox/dark-v11',
+  streets: 'mapbox://styles/mapbox/streets-v12',
   satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
 };
 
@@ -23,16 +23,14 @@ interface MapViewProps {
 
 /** Creates a stretchable pill-shaped image for use with icon-text-fit */
 function createPillImage(color: string, borderColor: string): ImageData {
-  // Wider image so there's an actual stretchable center section
   const w = 40;
   const h = 24;
-  const r = h / 2; // full-height rounding for pill ends
+  const r = h / 2;
   const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d')!;
 
-  // Draw pill (rounded rect with full-radius corners)
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.roundRect(1, 1, w - 2, h - 2, r);
@@ -51,21 +49,19 @@ function createPillImage(color: string, borderColor: string): ImageData {
 function addPillImages(map: mapboxgl.Map) {
   const w = 40;
   const h = 24;
-  const r = h / 2; // 12px — matches the rounded ends
+  const r = h / 2;
   const stretchConfig = {
-    // content = text placement area [x1, y1, x2, y2]
     content: [r, 4, w - r, h - 4] as [number, number, number, number],
-    // stretchX/Y = which pixel ranges can be stretched (must be non-zero width!)
-    stretchX: [[r, w - r]] as [number, number][],   // [[12, 28]] — 16px horizontal
-    stretchY: [[8, h - 8]] as [number, number][],    // [[8, 16]]  — 8px vertical
+    stretchX: [[r, w - r]] as [number, number][],
+    stretchY: [[8, h - 8]] as [number, number][],
     pixelRatio: 2,
   };
 
   if (!map.hasImage('price-pill')) {
-    map.addImage('price-pill', createPillImage('#18181b', '#27272a'), stretchConfig);
+    map.addImage('price-pill', createPillImage('#ffffff', '#e5e7eb'), stretchConfig);
   }
   if (!map.hasImage('price-pill-hover')) {
-    map.addImage('price-pill-hover', createPillImage('#D4AF37', '#F8D673'), stretchConfig);
+    map.addImage('price-pill-hover', createPillImage('#8B2332', '#6d1b28'), stretchConfig);
   }
 }
 
@@ -90,8 +86,8 @@ const PROPERTY_LABEL_LAYER: any = {
     'text-color': [
       'case',
       ['boolean', ['feature-state', 'hover'], false],
-      '#000000',
-      '#D4AF37',
+      '#ffffff',
+      '#1a1a1a',
     ],
   },
 };
@@ -109,7 +105,6 @@ export function MapView({
   const [cursor, setCursor] = useState('default');
   const hoveredIdRef = useRef<number | null>(null);
 
-  // Convert properties to GeoJSON — rendered natively by Mapbox GL on the WebGL canvas
   const geojsonData = useMemo(
     () => ({
       type: 'FeatureCollection' as const,
@@ -133,25 +128,20 @@ export function MapView({
 
   const hoveredProperty = properties.find((p) => p.mlsId === hoveredPropertyId);
 
-  // Add pill images on map load + re-add on style change
   const handleMapLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
     if (!map) return;
 
     addPillImages(map);
-
-    // Re-add images when style changes (e.g. streets ↔ satellite)
     map.on('style.load', () => addPillImages(map));
 
     setMapLoaded(true);
   }, []);
 
-  // Sync hover state from sidebar → map feature state
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
 
-    // Clear previous
     if (hoveredIdRef.current !== null) {
       try {
         map.setFeatureState(
@@ -163,7 +153,6 @@ export function MapView({
       }
     }
 
-    // Set new
     if (hoveredPropertyId !== null) {
       try {
         map.setFeatureState(
@@ -178,8 +167,8 @@ export function MapView({
     hoveredIdRef.current = hoveredPropertyId;
   }, [hoveredPropertyId, mapLoaded]);
 
-  // Handle map hover → highlight pin + notify parent
   const handleMouseMove = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       const features = event.features;
       if (!features || features.length === 0) {
@@ -199,8 +188,8 @@ export function MapView({
     onPropertyHover(null);
   }, [onPropertyHover]);
 
-  // Handle click → navigate to property
   const handleClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       const features = event.features;
       if (!features || features.length === 0) return;

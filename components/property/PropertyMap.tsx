@@ -1,6 +1,7 @@
 'use client';
 
 import Map, { Marker } from 'react-map-gl/mapbox';
+import { MapPin } from 'lucide-react';
 
 interface PropertyMapProps {
   lat: number;
@@ -9,7 +10,7 @@ interface PropertyMapProps {
 
 export function PropertyMap({ lat, lng }: PropertyMapProps) {
   return (
-    <div className="rounded-lg overflow-hidden h-[300px] w-full">
+    <div className="h-[300px] w-full">
       <Map
         initialViewState={{
           longitude: lng,
@@ -22,10 +23,8 @@ export function PropertyMap({ lat, lng }: PropertyMapProps) {
         scrollZoom={false}
       >
         <Marker longitude={lng} latitude={lat} anchor="center">
-          <div className="w-8 h-8 bg-blue-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-            </svg>
+          <div className="w-10 h-10 bg-[#8B2332] rounded-full border-[3px] border-white shadow-lg flex items-center justify-center">
+            <MapPin className="w-4 h-4 text-white" />
           </div>
         </Marker>
       </Map>

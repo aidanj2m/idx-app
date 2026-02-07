@@ -2,6 +2,7 @@
 
 import { Property } from '@/lib/types/property';
 import { formatPrice, formatNumber } from '@/lib/utils/formatters';
+import { Bed, Bath, Maximize, ChevronLeft } from 'lucide-react';
 
 interface PropertySidebarProps {
   properties: Property[];
@@ -29,40 +30,55 @@ function SidebarCard({
 
   return (
     <div
-      className={`cursor-pointer rounded-lg overflow-hidden border transition-all duration-200 ${
+      className={`cursor-pointer rounded-xl overflow-hidden border transition-all duration-200 bg-white ${
         isHovered
-          ? 'border-[#D4AF37] shadow-lg ring-1 ring-[#D4AF37]/20'
-          : 'border-zinc-800 hover:border-zinc-700 hover:shadow-md'
+          ? 'border-[#8B2332]/40 shadow-[0_4px_20px_rgba(139,35,50,0.12)] scale-[1.01]'
+          : 'border-stone-100 hover:border-stone-200 hover:shadow-md'
       }`}
       onMouseEnter={() => onHover(property.mlsId)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(property.mlsId)}
     >
       {imageUrl && (
-        <div className="h-32 overflow-hidden bg-zinc-800">
+        <div className="h-36 overflow-hidden bg-stone-100 relative">
           <img
             src={imageUrl}
             alt={address?.full || 'Property'}
             className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+          <div className="absolute bottom-2.5 left-3">
+            <span className="text-lg font-bold text-white drop-shadow-md">
+              {formatPrice(listPrice?.price)}
+            </span>
+          </div>
         </div>
       )}
-      <div className="p-3 bg-zinc-900">
-        <p className="text-base font-bold text-[#D4AF37]">
-          {formatPrice(listPrice?.price)}
-        </p>
-        <p className="text-xs text-gray-400 mt-0.5 truncate">
+      {!imageUrl && (
+        <div className="px-3.5 pt-3.5">
+          <p className="text-lg font-bold text-[#8B2332]">
+            {formatPrice(listPrice?.price)}
+          </p>
+        </div>
+      )}
+      <div className="p-3.5">
+        <p className="text-[12px] text-stone-500 truncate mb-2">
           {address?.full || 'Address unavailable'}
         </p>
-        <div className="flex gap-2 mt-1.5 text-xs text-gray-500">
-          <span>{details?.bedrooms || 0} bd</span>
-          <span className="text-gray-700">|</span>
-          <span>{(details?.bathsFull || 0) + (details?.bathsHalf || 0) * 0.5} ba</span>
+        <div className="flex gap-3 text-[12px] text-stone-500">
+          <span className="flex items-center gap-1">
+            <Bed className="w-3.5 h-3.5 text-stone-400" />
+            {details?.bedrooms || 0} bd
+          </span>
+          <span className="flex items-center gap-1">
+            <Bath className="w-3.5 h-3.5 text-stone-400" />
+            {(details?.bathsFull || 0) + (details?.bathsHalf || 0) * 0.5} ba
+          </span>
           {details?.area && (
-            <>
-              <span className="text-gray-700">|</span>
-              <span>{formatNumber(details.area)} sqft</span>
-            </>
+            <span className="flex items-center gap-1">
+              <Maximize className="w-3.5 h-3.5 text-stone-400" />
+              {formatNumber(details.area)} ft²
+            </span>
           )}
         </div>
       </div>
@@ -83,27 +99,34 @@ export function PropertySidebar({
     <div className="relative flex">
       {/* Sidebar panel */}
       <div
-        className={`bg-zinc-950 border-r border-zinc-800 transition-all duration-300 overflow-hidden ${
-          isOpen ? 'w-96' : 'w-0'
+        className={`bg-[#fafaf9] border-r border-stone-200 transition-all duration-300 overflow-hidden ${
+          isOpen ? 'w-[380px]' : 'w-0'
         }`}
       >
-        <div className="w-96 h-full flex flex-col">
+        <div className="w-[380px] h-full flex flex-col">
           {/* Header */}
-          <div className="p-4 border-b border-zinc-800 shrink-0">
-            <h2 className="text-lg font-semibold text-white">
-              {loading ? 'Searching...' : `${properties.length} Properties`}
-            </h2>
+          <div className="px-4 py-3 border-b border-stone-100 shrink-0">
+            <p className="text-[13px] font-medium text-stone-800">
+              {loading ? 'Searching...' : `${properties.length} Properties Found`}
+            </p>
           </div>
 
           {/* Property list */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
             {loading ? (
-              [...Array(6)].map((_, i) => (
-                <div key={i} className="bg-zinc-900 rounded-lg h-48 animate-pulse" />
+              [...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl border border-stone-100 overflow-hidden">
+                  <div className="h-36 bg-stone-100 animate-pulse" />
+                  <div className="p-3.5 space-y-2">
+                    <div className="h-3 bg-stone-100 rounded-lg animate-pulse w-3/4" />
+                    <div className="h-3 bg-stone-50 rounded-lg animate-pulse w-1/2" />
+                  </div>
+                </div>
               ))
             ) : properties.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p className="text-sm">No properties found</p>
+              <div className="text-center py-16 text-stone-400">
+                <p className="text-[13px]">No properties found</p>
+                <p className="text-[12px] mt-1">Try adjusting your filters</p>
               </div>
             ) : (
               properties.map((property) => (
@@ -123,16 +146,11 @@ export function PropertySidebar({
       {/* Toggle button */}
       <button
         onClick={onToggle}
-        className="absolute top-1/2 -translate-y-1/2 -right-8 z-10 bg-zinc-900 w-8 h-16 rounded-r-lg shadow-md border border-l-0 border-zinc-800 flex items-center justify-center hover:bg-zinc-800 transition-colors"
+        className="absolute top-1/2 -translate-y-1/2 -right-7 z-10 bg-white w-7 h-14 rounded-r-lg shadow-md border border-l-0 border-stone-200 flex items-center justify-center hover:bg-stone-50 transition-colors"
       >
-        <svg
-          className={`w-4 h-4 text-[#D4AF37] transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft
+          className={`w-4 h-4 text-[#8B2332] transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`}
+        />
       </button>
     </div>
   );
